@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.termux.xinhao.web.activity.ZRSettingsActivity;
+import com.termux.xinhao.web.socket.AndroidTextSocketService;
 import com.xinhao.web.services.R;
 import com.termux.app.api.file.FileReceiverActivity;
 import com.termux.app.terminal.TermuxActivityRootView;
@@ -92,7 +93,7 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
     /**
      * The {@link TerminalView} shown in  {@link TermuxActivity} that displays the terminal.
      */
-    TerminalView mTerminalView;
+    public TerminalView mTerminalView;
 
     /**
      *  The {@link TerminalViewClient} interface implementation to allow for communication between
@@ -288,6 +289,8 @@ public final class TermuxActivity extends AppCompatActivity implements ServiceCo
                 getDrawer().openDrawer(Gravity.LEFT);
             }
         });
+
+        startService(new Intent(this, AndroidTextSocketService.class));
     }
 
     @Override

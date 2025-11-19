@@ -14,6 +14,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,9 +34,9 @@ import com.molihuan.pathselector.listener.FileItemListener;
 import com.molihuan.pathselector.utils.MConstants;
 import com.molihuan.pathselector.utils.Mtools;
 import com.termux.app.TermuxActivity;
+import com.termux.shared.termux.TermuxConstants;
 import com.termux.shared.zerorootfs.UserSetManage;
 import com.termux.shared.zerorootfs.bean.ZTUserBean;
-import com.termux.x11.MainActivity;
 import com.termux.xinhao.web.ZRFileUrl;
 import com.termux.xinhao.web.libsu.LibSuManage;
 import com.termux.xinhao.web.sh.ZRShell;
@@ -97,7 +99,6 @@ public class XHWebActivity extends AppCompatActivity implements LibSuManage.Time
             @Override
             public void onClick(View v) {
                 UUtils.showMsg(UUtils.getString(R.string.debug));
-                startActivity(new Intent(XHWebActivity.this, MainActivity.class));
             }
         });
         try {
@@ -111,21 +112,21 @@ public class XHWebActivity extends AppCompatActivity implements LibSuManage.Time
         open_termux.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!new File(ZRFileUrl.env).exists()) {
+               /* if(!new File(ZRFileUrl.env).exists()) {
                     UUtils.showMsg(UUtils.getString(R.string.not_installation));
                     return;
                 }
                 if (isRunThread) {
                     UUtils.showMsg(UUtils.getString(R.string.not_start_termux));
                     return;
-                }
+                }*/
                 startActivity(new Intent(XHWebActivity.this, TermuxActivity.class));
             }
         });
         install.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isRunThread) {
+              /*  if (isRunThread) {
                     UUtils.showMsg(UUtils.getString(R.string.not_install));
                   return;
                 }
@@ -136,7 +137,7 @@ public class XHWebActivity extends AppCompatActivity implements LibSuManage.Time
                     public void run() {
                         installRootfs();
                     }
-                }).start();
+                }).start();*/
             }
         });
         settings.setOnClickListener(new View.OnClickListener() {
@@ -156,6 +157,22 @@ public class XHWebActivity extends AppCompatActivity implements LibSuManage.Time
             startActivity(new Intent(XHWebActivity.this, TermuxActivity.class));
             finish();
         }
+        if (ZRFileUrl.isOsInstall()) {
+            startActivity(new Intent(XHWebActivity.this, TermuxActivity.class));
+            finish();
+        } else {
+            installOs();
+        }
+    }
+
+    private void installOs() {
+        runThread();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                installRootfs();
+            }
+        }).start();
     }
 
     /**
@@ -167,13 +184,6 @@ public class XHWebActivity extends AppCompatActivity implements LibSuManage.Time
         fileBean.setName("rootfs.tar.xz");
         fileBean.setPath(LibSuManage.BASHRC_TERMUX_UBUNTU_TGZ_FILE);
         startInstallRootfs(fileBean, true);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                console.setText(console.getText() + "\n" + UUtils.getString(R.string.install_ok));
-            }
-        });
     }
 
     @Override
@@ -325,11 +335,45 @@ public class XHWebActivity extends AppCompatActivity implements LibSuManage.Time
         mHanlder.removeCallbacksAndMessages(null);
     }
 
+    private void startInstallCustomisedRoots(FileBean fileBean, boolean isOutputRootfs) {
+        //  //输出工具包
+        //######################输出工具包到私有目录
+        LibSuManage.getInstall().outputFile(isOutputRootfs);
+
+        //######################输出工具包加压sh脚本
+        ZRShell.initInstallTool();
+        writerShellSh(ZRShell.installTool, ZRFileUrl.installTool);
+
+        //######################写入启动脚本
+        String[] assetsStartRootfs = getAssetsStartRootfs();
+        ZRShell.initStartRootfs(assetsStartRootfs);
+        writerShellSh(ZRShell.startRootfs, ZRFileUrl.startRootfs);
+        UUtils.writerFile("start_vnc", new File(ZRFileUrl.startVnc));
+        try {
+            Os.chmod(ZRFileUrl.startVnc, 0777);
+        } catch (ErrnoException e) {
+            e.printStackTrace();
+        }
+        // java/com/termux/xinhao/web/ZRFileUrl.java#30
+        // java/com/termux/shared/termux/shell/command/runner/terminal/TermuxSession.java#125
+
+        //######################跳转到termux
+        runOnUiThread(() -> {
+            startActivity(new Intent(XHWebActivity.this, TermuxActivity.class));
+            finish();
+        });
+    }
+
     /**
      * 开始安装自定义Rootfs 1.输出安装脚本到本地目录
      */
     private void startInstallRootfs(FileBean fileBean, boolean isOutputRootfs) {
-        //输出工具包
+        if (true) {
+            // 强制使用定制rootfs
+            startInstallCustomisedRoots(fileBean, isOutputRootfs);
+            return;
+        }
+      //  //输出工具包
         //######################1.输出工具包到私有目录
         LibSuManage.getInstall().outputFile(isOutputRootfs);
 

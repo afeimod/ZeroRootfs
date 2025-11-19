@@ -117,11 +117,12 @@ public class TermuxSession {
                 // https://cs.android.com/android/platform/superproject/+/android-11.0.0_r3:external/mksh/src/main.c;l=41
                 // https://cs.android.com/android/platform/superproject/+/android-11.0.0_r3:external/mksh/Android.bp;l=114
                 ZTUserBean ztUserBean = UserSetManage.getInstall1().getZTUserBean();
-                if (ztUserBean.isBug()) {
+                /*if (ztUserBean.isBug()) {
                     executionCommand.executable = "sh";
                 } else {
                     executionCommand.executable = "./startrootfs.sh";
-                }
+                }*/
+                executionCommand.executable = "sh";
                 // 运行标记111111111112222222222QWERTYUIOP
             } else {
                 isLoginShell = true;

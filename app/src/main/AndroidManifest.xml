@@ -237,10 +237,21 @@
         <receiver
             android:name="com.termux.shared.activities.ReportActivity$ReportActivityBroadcastReceiver"
             android:exported="false" />
+        <receiver
+            android:name="com.termux.xinhao.web.receiver.ZeroVncReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <!-- 指定广播 Action -->
+                <action android:name="com.termux.app.reload_vnc" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name="com.termux.app.TermuxService"
             android:exported="false" />
+        <service android:name="com.termux.xinhao.web.socket.AndroidTextSocketService"
+            android:exported="false"/>
         <service
             android:name="com.termux.app.RunCommandService"
             android:exported="true"

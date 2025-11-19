@@ -91,14 +91,10 @@ public class ZRSettingsActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-
-        switch (v.getId()) {
-            case R.id.zr_create_sdcard_ll:
-                createLink(ZRFileUrl.homeSdcard);
-                break;
-            case R.id.termux_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
+        if (v.getId() == R.id.zr_create_sdcard_ll) {
+            createLink(ZRFileUrl.homeSdcard);
+        } else if (v.getId() == R.id.termux_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
         }
     }
 

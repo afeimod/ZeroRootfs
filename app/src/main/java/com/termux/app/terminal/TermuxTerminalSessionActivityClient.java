@@ -10,12 +10,15 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.TextUtils;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.termux.xinhao.web.ZRFileUrl;
 import com.xinhao.web.services.R;
 import com.termux.shared.interact.ShareUtils;
 import com.termux.shared.termux.shell.command.runner.terminal.TermuxSession;
@@ -311,6 +314,13 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
             TerminalSession session = mActivity.getCurrentSession();
             mActivity.showToast(toToastTitle(session), false);
         }
+
+        if (!ZRFileUrl.isOsInstall()) {
+            mActivity.mTerminalView.sendTextToTerminal(ZRFileUrl.getInstallCommand());
+        } else {
+            mActivity.mTerminalView.sendTextToTerminal("./startrootfs.sh \n");
+        }
+
     }
 
     public void switchToSession(boolean forward) {
